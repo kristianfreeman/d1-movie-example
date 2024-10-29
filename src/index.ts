@@ -1,8 +1,20 @@
+import { WorkerEntrypoint } from "cloudflare:workers";
 import { Hono } from "hono";
 
 type Bindings = {
   DB: D1Database;
 };
+
+export class MoviesService extends WorkerEntrypoint {
+  async getMovies() {
+    const query = "select * from movies";
+    // @ts-expect-error
+    const { results: movies } = await this.env.DB
+      .prepare(query)
+      .all();
+    return movies;
+  };
+}
 
 const app = new Hono<{ Bindings: Bindings }>();
 
@@ -28,4 +40,4 @@ app.post("/movies/:id", async (c) => {
   return c.json({ ok });
 });
 
-export default app;
+export default app
